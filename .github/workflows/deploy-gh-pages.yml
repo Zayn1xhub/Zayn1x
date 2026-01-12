@@ -1,0 +1,42 @@
+name: Build and deploy to gh-pages
+
+# run on every push to main and manually via the UI
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# allow the action to push the gh-pages branch
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to gh-pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages            # branch to deploy to
+          folder: dist                # folder (output) to deploy
+          clean: true
+          commit-message: "ci: deploy site to gh-pages (via workflow)"
+          token: ${{ secrets.GITHUB_TOKEN }}
